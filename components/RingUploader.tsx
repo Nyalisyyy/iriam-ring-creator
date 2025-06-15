@@ -36,8 +36,12 @@ export function RingUploader() {
       const result = await response.json();
       setShareUrl(result.shareUrl);
 
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError('予期せぬエラーが発生しました。');
+      }
     } finally {
       setIsUploading(false);
     }

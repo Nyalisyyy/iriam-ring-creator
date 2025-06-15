@@ -1,16 +1,23 @@
 'use client';
 import { Check, Copy } from "lucide-react";
 import { useState } from "react";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from '@/components/ui/dialog'; // Shadcn/uiのDialogを想定
+// ↓↓↓ Dialog, DialogContent のインポートを削除します ↓↓↓
+// import {
+//   Dialog,
+//   DialogContent,
+//   DialogHeader,
+//   DialogTitle,
+//   DialogDescription,
+// } from '@/components/ui/dialog';
+
+interface SimpleDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  children: React.ReactNode;
+}
 
 // Shadcn/ui を使わない場合の簡易Dialog
-const SimpleDialog = ({ open, onOpenChange, children }: any) => {
+const SimpleDialog = ({ open, onOpenChange, children }: SimpleDialogProps) => {
   if (!open) return null;
   return (
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center" onClick={() => onOpenChange(false)}>
@@ -32,12 +39,13 @@ export function ShareModal({ url, onOpenChange }: { url: string; onOpenChange: (
 
   return (
     <SimpleDialog open={!!url} onOpenChange={onOpenChange}>
-      <DialogHeader>
-        <DialogTitle className="text-2xl font-bold text-center text-brand-secondary">URLができました！</DialogTitle>
-        <DialogDescription className="text-center text-slate-500 mt-2">
+      {/* ↓↓↓ 以下は変更ありません... */}
+      <div className="text-center">
+        <h2 className="text-2xl font-bold text-brand-secondary">URLができました！</h2>
+        <p className="text-slate-500 mt-2">
           このURLをリスナーさんにシェアして使ってもらおう！
-        </DialogDescription>
-      </DialogHeader>
+        </p>
+      </div>
       <div className="mt-6 flex items-center space-x-2">
         <input
           value={url}

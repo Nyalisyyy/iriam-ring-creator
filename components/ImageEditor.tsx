@@ -2,6 +2,7 @@
 
 import React, { useState, useCallback, useRef } from 'react';
 import Cropper, { Area } from 'react-easy-crop';
+import ImageT from 'next/image'; // ← Imageをインポート
 import { Download, Upload } from 'lucide-react';
 
 interface Props {
@@ -98,10 +99,12 @@ export function ImageEditor({ ringImageUrl }: Props) {
             ここに画像が表示されます
           </div>
         )}
-        <img 
+        <ImageT 
            src={ringImageUrl} 
            alt="Icon Ring"
-           style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', pointerEvents: 'none', zIndex: 10 }} 
+           width={300} // ← width を追加
+           height={300} // ← height を追加
+           className="absolute top-0 left-0 pointer-events-none z-10"
         />
       </div>
 
