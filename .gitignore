@@ -1,41 +1,58 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
-# dependencies
+# 依存パッケージ (npm install などで自動生成される)
+# これらは絶対にGitに含めないでください
 /node_modules
 /.pnp
-.pnp.*
-.yarn/*
-!.yarn/patches
-!.yarn/plugins
-!.yarn/releases
-!.yarn/versions
+.pnp.js
+.yarn/install-state.gz
 
-# testing
-/coverage
-
-# next.js
+# Next.jsのビルド成果物とキャッシュ
+# これらもGitに含める必要はありません
 /.next/
 /out/
 
-# production
+# テストカバレッジレポート
+/coverage
+
+# 本番用ビルド (古い設定)
 /build
 
-# misc
+# OS固有のファイル
 .DS_Store
-*.pem
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
 
-# debug
+# ログファイル
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-.pnpm-debug.log*
+pnpm-debug.log*
 
-# env files (can opt-in for committing if needed)
-.env*
+# ローカル環境変数ファイル
+# APIキーなどの秘密情報を含むため、絶対にGitに含めないでください
+.env.local
+.env.development.local
+.env.production.local
+.env.test.local
 
-# vercel
+# Vercelプラットフォーム用の設定
 .vercel
 
-# typescript
+# TypeScriptのビルドキャッシュ
 *.tsbuildinfo
+
+# Next.jsが自動生成する型定義ファイル
+# このファイルはローカルで自動生成されるべきものです
 next-env.d.ts
+
+# エディタ/IDEの設定
+.vscode/
+.idea/
+
+# 証明書ファイル
+*.pem
