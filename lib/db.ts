@@ -1,17 +1,23 @@
-import { createPool } from '@vercel/postgres';
+import { createClient } from '@vercel/postgres';
 import type { IconRing } from '@/types';
 
 export async function getRingById(id: string): Promise<IconRing | null> {
-  // 【重要】データベース接続を、関数が呼び出されたこの瞬間に実行する
-  const pool = createPool({
+  // createClient() を使用して、直接接続クライアントを作成
+  const client = createClient({
     connectionString: process.env.DIRECT_DATABASE_URL,
   });
+  // データベースに接続
+  await client.connect();
 
   try {
-    const result = await pool.sql<IconRing>`SELECT * FROM icon_rings WHERE id = ${id}`;
+    // client.sql を使ってクエリを実行
+    const result = await client.sql<IconRing>`SELECT * FROM icon_rings WHERE id = ${id}`;
     return result.rows[0] || null;
   } catch (error) {
     console.error('Failed to fetch ring:', error);
     return null;
+  } finally {
+    // 【重要】処理が終わったら、必ず接続を閉じる
+    await client.end();
   }
 }

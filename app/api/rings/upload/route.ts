@@ -1,17 +1,20 @@
 import { put } from '@vercel/blob';
-import { createPool } from '@vercel/postgres';
+import { createClient } from '@vercel/postgres'; // ここを変更
 import { nanoid } from 'nanoid';
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
-  // 【重要】データベース接続を、APIが呼び出されたこの瞬間に実行する
-  const pool = createPool({
+  // createClient() を使用して、直接接続クライアントを作成
+  const client = createClient({
     connectionString: process.env.DIRECT_DATABASE_URL,
   });
+  // データベースに接続
+  await client.connect();
 
   const filename = request.headers.get('x-vercel-filename') || 'ring.png';
 
   if (!request.body) {
+    await client.end(); // エラー時も接続を閉じる
     return NextResponse.json({ error: "No file body" }, { status: 400 });
   }
 
@@ -24,7 +27,8 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     
     const ringId = nanoid(12);
 
-    await pool.sql`
+    // client.sql を使ってクエリを実行
+    await client.sql`
       INSERT INTO icon_rings (id, image_url) VALUES (${ringId}, ${blob.url});
     `;
 
@@ -36,6 +40,9 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
   } catch (error) {
     console.error("Upload API Error:", error);
-    return NextResponse.json({ error: { message: 'Failed to upload file.', error: error } }, { status: 500 });
+    return NextResponse.json({ error: { message: 'Failed to upload file.' }}, { status: 500 });
+  } finally {
+    // 【重要】処理が終わったら、必ず接続を閉じる
+    await client.end();
   }
 }
