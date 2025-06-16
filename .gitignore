@@ -56,5 +56,3 @@ next-env.d.ts
 
 # 証明書ファイル
 *.pem
-
-.next
