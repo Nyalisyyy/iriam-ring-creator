@@ -1,7 +1,12 @@
 import { put } from '@vercel/blob';
-import { sql } from '@vercel/postgres';
+import { createPool } from '@vercel/postgres'; // ここを変更
 import { nanoid } from 'nanoid';
 import { NextRequest, NextResponse } from 'next/server';
+
+// 新しい環境変数を使って、データベースの接続プールを作成
+const pool = createPool({
+  connectionString: process.env.DIRECT_DATABASE_URL,
+});
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
   const filename = request.headers.get('x-vercel-filename') || 'ring.png';
@@ -14,13 +19,13 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     const blob = await put(filename, request.body, {
       access: 'public',
       contentType: 'image/png',
-      // 【重要】この一行を追加します
       addRandomSuffix: true, 
     });
     
     const ringId = nanoid(12);
 
-    await sql`
+    // pool.sqlを使ってクエリを実行
+    await pool.sql`
       INSERT INTO icon_rings (id, image_url) VALUES (${ringId}, ${blob.url});
     `;
 
