@@ -7,7 +7,7 @@ import type { JSX } from 'react'; // JSX型をreactからインポート
 // Next.jsのApp Routerで推奨される、より厳格なPropsの型定義
 interface CreatePageProps {
   params: Promise<{ ringId: string }>;
-  searchParams: { [key: string]: string | string[] | undefined };
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }
 
 // asyncコンポーネントであることを踏まえ、返り値の型もPromise<JSX.Element>と明記します
