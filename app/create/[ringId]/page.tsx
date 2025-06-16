@@ -3,9 +3,7 @@ import { ImageEditor } from '@/components/ImageEditor';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 
-// type Props = ...; の行を削除します
-
-// 関数の引数に直接型を定義します
+// 【重要】ここの引数の型定義を下記のようにしてください
 export default async function CreatePage({ params }: { params: { ringId: string } }) {
   const ring = await getRingById(params.ringId);
 
