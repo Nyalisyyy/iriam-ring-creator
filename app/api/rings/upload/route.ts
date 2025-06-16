@@ -4,8 +4,7 @@ import { nanoid } from 'nanoid';
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
-  const { searchParams } = new URL(request.url);
-  const filename = searchParams.get('filename') || 'ring.png';
+  const filename = request.headers.get('x-vercel-filename') || 'ring.png';
 
   if (!request.body) {
     return NextResponse.json({ error: "No file body" }, { status: 400 });
@@ -15,6 +14,8 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     const blob = await put(filename, request.body, {
       access: 'public',
       contentType: 'image/png',
+      // 【重要】この一行を追加します
+      addRandomSuffix: true, 
     });
     
     const ringId = nanoid(12);
@@ -30,7 +31,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     return NextResponse.json({ ringId, shareUrl });
 
   } catch (error) {
-    console.error(error);
+    console.error("Upload API Error:", error);
     return NextResponse.json({ error: "Failed to upload file." }, { status: 500 });
   }
 }
