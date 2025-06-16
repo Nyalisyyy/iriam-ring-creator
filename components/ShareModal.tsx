@@ -1,14 +1,17 @@
 'use client';
 
-import { Check, Copy } from "lucide-react";
+import { Check, Copy, X } from "lucide-react";
 import { useState } from "react";
 
 // 簡易的なモーダル（ポップアップ）コンポーネント
 const Dialog = ({ open, onOpenChange, children }: { open: boolean, onOpenChange: (open: boolean) => void, children: React.ReactNode }) => {
   if (!open) return null;
   return (
-    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center" onClick={() => onOpenChange(false)}>
-      <div className="bg-white rounded-2xl p-8 shadow-2xl w-full max-w-md mx-4" onClick={(e) => e.stopPropagation()}>
+    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+      <div className="relative bg-white rounded-2xl p-8 shadow-2xl w-full max-w-md mx-auto" onClick={(e) => e.stopPropagation()}>
+        <button onClick={() => onOpenChange(false)} className="absolute top-4 right-4 text-slate-400 hover:text-slate-600">
+          <X size={24} />
+        </button>
         {children}
       </div>
     </div>
@@ -21,7 +24,7 @@ export function ShareModal({ url, onOpenChange }: { url: string; onOpenChange: (
   const copyToClipboard = () => {
     navigator.clipboard.writeText(url).then(() => {
       setHasCopied(true);
-      setTimeout(() => setHasCopied(false), 2000); // 2秒後に元に戻す
+      setTimeout(() => setHasCopied(false), 2000); // 2秒後にアイコンを元に戻す
     });
   };
 
@@ -41,7 +44,7 @@ export function ShareModal({ url, onOpenChange }: { url: string; onOpenChange: (
         />
         <button
           onClick={copyToClipboard}
-          className="p-3 rounded-lg bg-pastel-pink text-white hover:bg-opacity-90 transition-all duration-200"
+          className="p-3 rounded-lg bg-pastel-pink text-slate-800 hover:bg-opacity-90 transition-all duration-200"
         >
           {hasCopied ? <Check className="h-5 w-5" /> : <Copy className="h-5 w-5" />}
         </button>

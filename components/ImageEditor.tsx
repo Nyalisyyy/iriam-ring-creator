@@ -3,6 +3,8 @@
 import React, { useState, useCallback, useRef } from 'react';
 import Cropper, { Area } from 'react-easy-crop';
 import { Download, Upload } from 'lucide-react';
+// Next.jsのImageコンポーネントは、ここで表示するリング画像には使いません
+// import Image from 'next/image'; 
 
 interface Props {
   ringImageUrl: string;
@@ -35,22 +37,36 @@ export function ImageEditor({ ringImageUrl }: Props) {
     try {
       const canvas = document.createElement('canvas');
       const ctx = canvas.getContext('2d');
-      if (!ctx) return;
+      if (!ctx) {
+        setIsProcessing(false);
+        return;
+      };
   
-      const ringImg = new Image();
-      ringImg.crossOrigin = "anonymous"; // この行が重要です
+      // 【重要】 new Image() を new window.Image() に変更
+      const ringImg = new window.Image();
+      ringImg.crossOrigin = "anonymous";
       ringImg.src = ringImageUrl;
       
-      await new Promise(resolve => { ringImg.onload = resolve });
+      // 画像の読み込みを待つ
+      await new Promise((resolve, reject) => {
+        ringImg.onload = resolve;
+        ringImg.onerror = reject;
+      });
 
       const finalSize = ringImg.width > 0 ? ringImg.width : 512;
       canvas.width = finalSize;
       canvas.height = finalSize;
 
-      const userImg = new Image();
+      // 【重要】こちらも new window.Image() に変更
+      const userImg = new window.Image();
       userImg.crossOrigin = "anonymous";
       userImg.src = userImage;
-      await new Promise(resolve => { userImg.onload = resolve });
+      
+      // 画像の読み込みを待つ
+      await new Promise((resolve, reject) => {
+        userImg.onload = resolve;
+        userImg.onerror = reject;
+      });
       
       ctx.drawImage(
         userImg,
@@ -91,7 +107,6 @@ export function ImageEditor({ ringImageUrl }: Props) {
             showGrid={false}
           />
         )}
-        {/* 【重要】リング画像のimgタグにもcrossOriginを追加 */}
         <img 
            src={ringImageUrl} 
            alt="Icon Ring"
@@ -106,7 +121,7 @@ export function ImageEditor({ ringImageUrl }: Props) {
       </div>
 
       <div className="w-full max-w-xs flex flex-col gap-4">
-        <button onClick={() => fileInputRef.current?.click()} className="flex items-center justify-center gap-2 w-full bg-pastel-pink text-white font-bold py-3 px-4 rounded-xl hover:bg-opacity-90 transition-all duration-200 shadow-md">
+        <button onClick={() => fileInputRef.current?.click()} className="flex items-center justify-center gap-2 w-full bg-pastel-pink text-slate-800 font-bold py-3 px-4 rounded-xl hover:bg-opacity-90 transition-all duration-200 shadow-md">
           <Upload className="w-5 h-5" />
           画像をえらぶ
         </button>
@@ -114,10 +129,10 @@ export function ImageEditor({ ringImageUrl }: Props) {
 
         <div className="flex items-center gap-2">
             <span className="text-sm text-slate-600">大きさ</span>
-            <input type="range" value={zoom} min={1} max={3} step={0.01} onChange={(e) => setZoom(Number(e.target.value))} className="w-full h-2 bg-white rounded-lg appearance-none cursor-pointer" disabled={!userImage} />
+            <input type="range" value={zoom} min={0.2} max={3} step={0.01} onChange={(e) => setZoom(Number(e.target.value))} className="w-full h-2 bg-white rounded-lg appearance-none cursor-pointer" disabled={!userImage} />
         </div>
 
-        <button onClick={handleDownload} disabled={!userImage || isProcessing} className="flex items-center justify-center gap-2 w-full bg-brand-secondary text-white font-bold py-3 px-4 rounded-xl hover:bg-opacity-90 transition-all duration-200 shadow-md disabled:bg-slate-300 disabled:cursor-not-allowed">
+        <button onClick={handleDownload} disabled={!userImage || isProcessing} className="flex items-center justify-center gap-2 w-full bg-brand-secondary text-slate-800 font-bold py-3 px-4 rounded-xl hover:bg-opacity-90 transition-all duration-200 shadow-md disabled:bg-slate-300 disabled:cursor-not-allowed">
           <Download className="w-5 h-5" />
           {isProcessing ? "作成中..." : "画像を保存"}
         </button>

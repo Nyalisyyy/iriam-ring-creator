@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { UploadCloud } from 'lucide-react';
-import { ShareModal } from './ShareModal';
+import { ShareModal } from './ShareModal'; // ShareModalをインポート
 
 export function RingUploader() {
   const [isUploading, setIsUploading] = useState(false);
@@ -21,10 +21,11 @@ export function RingUploader() {
     setIsUploading(true);
 
     try {
-      const response = await fetch(`/api/rings/upload?filename=${encodeURIComponent(file.name)}`, {
+      const response = await fetch(`/api/rings/upload`, {
         method: 'POST',
         headers: {
           'Content-Type': file.type,
+          'x-vercel-filename': file.name // ファイル名をヘッダーで渡す
         },
         body: file,
       });
@@ -37,7 +38,7 @@ export function RingUploader() {
       const result = await response.json();
       setShareUrl(result.shareUrl);
 
-    } catch (err) { // 【重要】(err: any) を (err) に変更し、安全にエラーを処理します
+    } catch (err) {
       if (err instanceof Error) {
         setError(err.message);
       } else {
@@ -94,6 +95,7 @@ export function RingUploader() {
         </div>
       )}
 
+      {/* ShareModalを呼び出す */}
       {shareUrl && (
         <ShareModal 
           url={shareUrl} 
