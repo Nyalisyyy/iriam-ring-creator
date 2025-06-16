@@ -1,23 +1,21 @@
 import type { Config } from "tailwindcss";
-const colors = require('tailwindcss/colors'); // この行を必ず追加してください
+const colors = require('tailwindcss/colors');
 
 const config: Config = {
+  // 【重要】このcontentの設定が正しいかご確認ください
   content: [
     "./pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./components/**/*.{js,ts,jsx,tsx,mdx}",
     "./app/**/*.{js,ts,jsx,tsx,mdx}",
   ],
   theme: {
-    // 【重要】extendの外にcolorsを定義します
     colors: {
-      // 既存の便利なカラーも使えるように設定
       transparent: 'transparent',
       current: 'currentColor',
       black: colors.black,
       white: colors.white,
       slate: colors.slate,
       red: colors.red,
-      // あなたのカスタムカラー
       'pastel-blue': '#AEE2FF',
       'pastel-purple': '#E2C2FF',
       'pastel-pink': '#FFC8DD',
@@ -25,9 +23,7 @@ const config: Config = {
       'brand-primary': '#B9E0FF',
       'brand-secondary': '#D4B8FF',
     },
-    extend: {
-      // colorsはここに置かないでください
-    },
+    extend: {},
   },
   plugins: [],
 };
