@@ -6,14 +6,14 @@ import type { JSX } from 'react'; // JSX型をreactからインポート
 
 // Next.jsのApp Routerで推奨される、より厳格なPropsの型定義
 interface CreatePageProps {
-  params: { ringId: string };
+  params: Promise<{ ringId: string }>;
   searchParams: { [key: string]: string | string[] | undefined };
 }
 
 // asyncコンポーネントであることを踏まえ、返り値の型もPromise<JSX.Element>と明記します
 export default async function CreatePage({ params }: CreatePageProps): Promise<JSX.Element> {
   // paramsからringIdを安全に取得します
-  const { ringId } = params;
+  const { ringId } = await params;
   const ring = await getRingById(ringId);
 
   // ringが見つからない場合は、404ページを表示します
