@@ -1,27 +1,14 @@
 'use client';
+
 import { Check, Copy } from "lucide-react";
 import { useState } from "react";
-// ↓↓↓ Dialog, DialogContent のインポートを削除します ↓↓↓
-// import {
-//   Dialog,
-//   DialogContent,
-//   DialogHeader,
-//   DialogTitle,
-//   DialogDescription,
-// } from '@/components/ui/dialog';
 
-interface SimpleDialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  children: React.ReactNode;
-}
-
-// Shadcn/ui を使わない場合の簡易Dialog
-const SimpleDialog = ({ open, onOpenChange, children }: SimpleDialogProps) => {
+// 簡易的なモーダル（ポップアップ）コンポーネント
+const Dialog = ({ open, onOpenChange, children }: { open: boolean, onOpenChange: (open: boolean) => void, children: React.ReactNode }) => {
   if (!open) return null;
   return (
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center" onClick={() => onOpenChange(false)}>
-      <div className="bg-white rounded-2xl p-8 shadow-2xl w-full max-w-md" onClick={(e) => e.stopPropagation()}>
+      <div className="bg-white rounded-2xl p-8 shadow-2xl w-full max-w-md mx-4" onClick={(e) => e.stopPropagation()}>
         {children}
       </div>
     </div>
@@ -32,14 +19,14 @@ export function ShareModal({ url, onOpenChange }: { url: string; onOpenChange: (
   const [hasCopied, setHasCopied] = useState(false);
 
   const copyToClipboard = () => {
-    navigator.clipboard.writeText(url);
-    setHasCopied(true);
-    setTimeout(() => setHasCopied(false), 2000);
+    navigator.clipboard.writeText(url).then(() => {
+      setHasCopied(true);
+      setTimeout(() => setHasCopied(false), 2000); // 2秒後に元に戻す
+    });
   };
 
   return (
-    <SimpleDialog open={!!url} onOpenChange={onOpenChange}>
-      {/* ↓↓↓ 以下は変更ありません... */}
+    <Dialog open={!!url} onOpenChange={onOpenChange}>
       <div className="text-center">
         <h2 className="text-2xl font-bold text-brand-secondary">URLができました！</h2>
         <p className="text-slate-500 mt-2">
@@ -59,9 +46,6 @@ export function ShareModal({ url, onOpenChange }: { url: string; onOpenChange: (
           {hasCopied ? <Check className="h-5 w-5" /> : <Copy className="h-5 w-5" />}
         </button>
       </div>
-    </SimpleDialog>
+    </Dialog>
   );
 }
-
-// Shadcn/ui用のDialogコンポーネントをcomponents/ui/dialog.tsxに作成する必要があります。
-// ここでは簡易的なモーダルで代用しています。
