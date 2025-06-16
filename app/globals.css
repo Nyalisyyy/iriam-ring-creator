@@ -3,5 +3,7 @@
 @tailwind utilities;
 
 body {
-  @apply bg-gradient-to-br from-pastel-blue to-pastel-purple min-h-screen text-slate-700;
+  background: linear-gradient(to bottom right, theme('colors.pastel-blue'), theme('colors.pastel-purple'));
+  min-height: 100vh;
+  color: theme('colors.slate.700');
 }
