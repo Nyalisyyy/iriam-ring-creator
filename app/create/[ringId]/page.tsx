@@ -3,7 +3,7 @@ import { ImageEditor } from '@/components/ImageEditor';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 
-// 【重要】ここの引数の型定義を下記のようにしてください
+// 【重要】ここの引数の型定義をご確認ください
 export default async function CreatePage({ params }: { params: { ringId: string } }) {
   const ring = await getRingById(params.ringId);
 

@@ -2,7 +2,4 @@
 @tailwind components;
 @tailwind utilities;
 
-/* 【重要】このシンプルな@applyの記述に戻してください */
-body {
-  @apply bg-gradient-to-br from-pastel-blue to-pastel-purple min-h-screen text-slate-700;
-}
+/* bodyへの@applyやその他のスタイル指定はすべて削除します */

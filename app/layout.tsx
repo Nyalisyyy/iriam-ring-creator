@@ -20,7 +20,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ja">
-      <body className={roundedMplus.className}>{children}</body>
+      {/* 【重要】bodyタグに直接クラスを記述します */}
+      <body className={`${roundedMplus.className} bg-gradient-to-br from-pastel-blue to-pastel-purple min-h-screen text-slate-700`}>
+        {children}
+      </body>
     </html>
   );
 }
