@@ -4,11 +4,11 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 
 type Props = {
-  params: { ringId: string };
+  params: Promise<{ ringId: string }>;
 };
 
 export default async function CreatePage({ params }: Props) {
-  const ring = await getRingById(params.ringId);
+  const ring = await getRingById((await params).ringId);
 
   if (!ring) {
     notFound();
