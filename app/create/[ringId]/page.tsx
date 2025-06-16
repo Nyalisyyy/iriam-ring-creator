@@ -2,7 +2,6 @@ import { getRingById } from '@/lib/db';
 import { ImageEditor } from '@/components/ImageEditor';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import { Header } from '@/components/Header';
 
 // type Props = ...; の行を削除します
 

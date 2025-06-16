@@ -1,4 +1,5 @@
 import type { Config } from "tailwindcss";
+const colors = require('tailwindcss/colors'); // この行を追加
 
 const config: Config = {
   content: [
@@ -7,19 +8,25 @@ const config: Config = {
     "./app/**/*.{js,ts,jsx,tsx,mdx}",
   ],
   theme: {
+    // extendの外にcolorsを定義します
+    colors: {
+      // 既存の便利なカラーも使えるように設定
+      transparent: 'transparent',
+      current: 'currentColor',
+      black: colors.black,
+      white: colors.white,
+      slate: colors.slate,
+      red: colors.red,
+      // ここからが、あなたのカスタムカラーです
+      'pastel-blue': '#AEE2FF',
+      'pastel-purple': '#E2C2FF',
+      'pastel-pink': '#FFC8DD',
+      'pastel-mint': '#A0E7E5',
+      'brand-primary': '#B9E0FF',
+      'brand-secondary': '#D4B8FF',
+    },
     extend: {
-      colors: {
-        'pastel-blue': '#AEE2FF',
-        'pastel-purple': '#E2C2FF',
-        'pastel-pink': '#FFC8DD',
-        'pastel-mint': '#A0E7E5',
-        'brand-primary': '#B9E0FF', // 明るいブルー系
-        'brand-secondary': '#D4B8FF', // 明るいパープル系
-      },
-      backgroundImage: {
-        "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",
-        "gradient-conic": "conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))",
-      },
+      // colors以外の拡張は、必要であればここに記述します
     },
   },
   plugins: [],
