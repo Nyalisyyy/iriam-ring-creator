@@ -14,7 +14,9 @@ const s3Client = new S3Client({
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
   const file = await request.blob();
-  const filename = request.headers.get('x-vercel-filename') || 'ring.png';
+  // 【重要】エンコードされたファイル名を受け取り、デコードして元に戻す
+  const encodedFilename = request.headers.get('x-vercel-filename');
+  const filename = encodedFilename ? decodeURIComponent(encodedFilename) : 'ring.png';
   const fileType = file.type;
 
   if (!file) {
@@ -50,14 +52,13 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     const host = request.headers.get("x-forwarded-host") || request.headers.get("host");
     const shareUrl = `${proto}://${host}/create/${ringId}`;
 
-    // 【重要】削除予定日を計算してレスポンスに追加
     const deletionDate = new Date();
     deletionDate.setDate(deletionDate.getDate() + 60);
 
     return NextResponse.json({
       ringId,
       shareUrl,
-      deletionDate: deletionDate.toISOString(), // ISO形式の文字列で返す
+      deletionDate: deletionDate.toISOString(),
     });
 
   } catch (error) {
