@@ -1,37 +1,59 @@
-import { put } from '@vercel/blob';
-import { createClient } from '@vercel/postgres'; // ここを変更
+import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
+import { createClient } from '@vercel/postgres';
 import { nanoid } from 'nanoid';
 import { NextRequest, NextResponse } from 'next/server';
 
+// R2と接続するためのS3クライアントを初期化
+const s3Client = new S3Client({
+  region: 'auto',
+  endpoint: `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
+  credentials: {
+    accessKeyId: process.env.R2_ACCESS_KEY_ID!,
+    secretAccessKey: process.env.R2_SECRET_ACCESS_KEY!,
+  },
+});
+
 export async function POST(request: NextRequest): Promise<NextResponse> {
-  // createClient() を使用して、直接接続クライアントを作成
-  const client = createClient({
-    connectionString: process.env.DIRECT_DATABASE_URL,
-  });
-  // データベースに接続
-  await client.connect();
-
+  const file = await request.blob();
   const filename = request.headers.get('x-vercel-filename') || 'ring.png';
+  const fileType = file.type;
 
-  if (!request.body) {
-    await client.end(); // エラー時も接続を閉じる
+  if (!file) {
     return NextResponse.json({ error: "No file body" }, { status: 400 });
   }
 
+  // ファイルをBufferに変換
+  const buffer = Buffer.from(await file.arrayBuffer());
+  const uniqueFilename = `${nanoid()}-${filename}`;
+
   try {
-    const blob = await put(filename, request.body, {
-      access: 'public',
-      contentType: 'image/png',
-      addRandomSuffix: true,
+    // R2にアップロードするためのコマンドを作成
+    const command = new PutObjectCommand({
+      Bucket: process.env.R2_BUCKET_NAME!,
+      Key: uniqueFilename,
+      Body: buffer,
+      ContentType: fileType,
     });
-    
+
+    // R2にファイルを送信
+    await s3Client.send(command);
+
+    // データベースに保存する公開URLを作成
+    const publicUrl = `${process.env.R2_PUBLIC_URL}/${uniqueFilename}`;
     const ringId = nanoid(12);
 
-    // client.sql を使ってクエリを実行
-    await client.sql`
-      INSERT INTO icon_rings (id, image_url) VALUES (${ringId}, ${blob.url});
-    `;
-
+    // データベースに接続してURLを保存
+    const client = createClient({ connectionString: process.env.DIRECT_DATABASE_URL });
+    await client.connect();
+    try {
+      await client.sql`
+        INSERT INTO icon_rings (id, image_url) VALUES (${ringId}, ${publicUrl});
+      `;
+    } finally {
+      await client.end();
+    }
+    
+    // クライアントに共有URLを返す
     const proto = request.headers.get("x-forwarded-proto") || 'http';
     const host = request.headers.get("x-forwarded-host") || request.headers.get("host");
     const shareUrl = `${proto}://${host}/create/${ringId}`;
@@ -41,8 +63,5 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
   } catch (error) {
     console.error("Upload API Error:", error);
     return NextResponse.json({ error: { message: 'Failed to upload file.' }}, { status: 500 });
-  } finally {
-    // 【重要】処理が終わったら、必ず接続を閉じる
-    await client.end();
   }
 }
