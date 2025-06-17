@@ -3,7 +3,6 @@ import { createClient } from '@vercel/postgres';
 import { nanoid } from 'nanoid';
 import { NextRequest, NextResponse } from 'next/server';
 
-// R2と接続するためのS3クライアントを初期化
 const s3Client = new S3Client({
   region: 'auto',
   endpoint: `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
@@ -22,27 +21,21 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     return NextResponse.json({ error: "No file body" }, { status: 400 });
   }
 
-  // ファイルをBufferに変換
   const buffer = Buffer.from(await file.arrayBuffer());
   const uniqueFilename = `${nanoid()}-${filename}`;
 
   try {
-    // R2にアップロードするためのコマンドを作成
     const command = new PutObjectCommand({
       Bucket: process.env.R2_BUCKET_NAME!,
       Key: uniqueFilename,
       Body: buffer,
       ContentType: fileType,
     });
-
-    // R2にファイルを送信
     await s3Client.send(command);
 
-    // データベースに保存する公開URLを作成
     const publicUrl = `${process.env.R2_PUBLIC_URL}/${uniqueFilename}`;
     const ringId = nanoid(12);
 
-    // データベースに接続してURLを保存
     const client = createClient({ connectionString: process.env.DIRECT_DATABASE_URL });
     await client.connect();
     try {
@@ -53,12 +46,19 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       await client.end();
     }
     
-    // クライアントに共有URLを返す
     const proto = request.headers.get("x-forwarded-proto") || 'http';
     const host = request.headers.get("x-forwarded-host") || request.headers.get("host");
     const shareUrl = `${proto}://${host}/create/${ringId}`;
 
-    return NextResponse.json({ ringId, shareUrl });
+    // 【重要】削除予定日を計算してレスポンスに追加
+    const deletionDate = new Date();
+    deletionDate.setDate(deletionDate.getDate() + 60);
+
+    return NextResponse.json({
+      ringId,
+      shareUrl,
+      deletionDate: deletionDate.toISOString(), // ISO形式の文字列で返す
+    });
 
   } catch (error) {
     console.error("Upload API Error:", error);
