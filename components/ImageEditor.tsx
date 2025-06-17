@@ -2,7 +2,28 @@
 
 import React, { useState, useCallback, useRef } from 'react';
 import Cropper, { Area } from 'react-easy-crop';
-import { Download, Upload } from 'lucide-react';
+import { Download, Upload, Save, X } from 'lucide-react';
+
+// 完成した画像を表示するためのポップアップ（モーダル）コンポーネント
+const ResultModal = ({ imageUrl, onClose }: { imageUrl: string; onClose: () => void; }) => {
+  return (
+    <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
+      <div className="relative bg-white rounded-2xl p-6 shadow-2xl w-full max-w-md mx-auto text-center">
+        <button onClick={onClose} className="absolute -top-4 -right-2 bg-slate-600 text-white rounded-full p-1 shadow-lg">
+          <X size={24} />
+        </button>
+        <h3 className="text-lg font-bold text-slate-800 mb-4">画像が完成しました！</h3>
+        <p className="text-sm text-slate-600 mb-4">画像を長押しして保存してください</p>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={imageUrl} alt="完成したアイコンリング" className="w-full max-w-[300px] mx-auto rounded-full border-4 border-white shadow-md" />
+        <button onClick={onClose} className="mt-6 w-full bg-brand-secondary text-slate-800 font-bold py-3 px-4 rounded-xl hover:bg-opacity-90 transition-all duration-200 shadow-md">
+          閉じる
+        </button>
+      </div>
+    </div>
+  );
+};
+
 
 interface Props {
   ringImageUrl: string;
@@ -14,6 +35,8 @@ export function ImageEditor({ ringImageUrl }: Props) {
   const [zoom, setZoom] = useState(1);
   const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
+  // 【重要】完成した画像を保持するためのstateを追加
+  const [finalImage, setFinalImage] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -28,7 +51,8 @@ export function ImageEditor({ ringImageUrl }: Props) {
     setCroppedAreaPixels(croppedAreaPixels);
   }, []);
   
-  const handleDownload = async () => {
+  // 【重要】handleSave に名称変更し、ロジックを修正
+  const handleSave = async () => {
     if (!userImage || !croppedAreaPixels) return;
     setIsProcessing(true);
 
@@ -44,8 +68,8 @@ export function ImageEditor({ ringImageUrl }: Props) {
       ringImg.crossOrigin = "anonymous";
       ringImg.src = ringImageUrl;
       
-      await new Promise((resolve, reject) => {
-        ringImg.onload = resolve;
+      await new Promise<void>((resolve, reject) => {
+        ringImg.onload = () => resolve();
         ringImg.onerror = reject;
       });
 
@@ -57,25 +81,16 @@ export function ImageEditor({ ringImageUrl }: Props) {
       userImg.crossOrigin = "anonymous";
       userImg.src = userImage;
       
-      await new Promise((resolve, reject) => {
-        userImg.onload = resolve;
+      await new Promise<void>((resolve, reject) => {
+        userImg.onload = () => resolve();
         userImg.onerror = reject;
       });
       
-      ctx.drawImage(
-        userImg,
-        croppedAreaPixels.x,
-        croppedAreaPixels.y,
-        croppedAreaPixels.width,
-        croppedAreaPixels.height,
-        0, 0, finalSize, finalSize
-      );
+      ctx.drawImage(userImg, croppedAreaPixels.x, croppedAreaPixels.y, croppedAreaPixels.width, croppedAreaPixels.height, 0, 0, finalSize, finalSize);
       ctx.drawImage(ringImg, 0, 0, finalSize, finalSize);
 
-      const link = document.createElement('a');
-      link.download = 'icon-with-ring.png';
-      link.href = canvas.toDataURL('image/png');
-      link.click();
+      // リンクをクリックさせる代わりに、stateに完成画像をセットする
+      setFinalImage(canvas.toDataURL('image/png'));
 
     } catch (error) {
       console.error("Failed to create image", error);
@@ -86,51 +101,42 @@ export function ImageEditor({ ringImageUrl }: Props) {
   };
 
   return (
-    <div className="w-full flex flex-col items-center gap-6 p-4 sm:p-6 bg-white/50 rounded-2xl shadow-lg">
-      <div className="relative w-full max-w-[300px] aspect-square bg-slate-200 rounded-full overflow-hidden">
-        {userImage && (
-          <Cropper
-            image={userImage}
-            crop={crop}
-            zoom={zoom}
-            aspect={1}
-            onCropChange={setCrop}
-            onZoomChange={setZoom}
-            onCropComplete={onCropComplete}
-            cropShape="round"
-            showGrid={false}
-          />
-        )}
-        <img 
-           src={ringImageUrl} 
-           alt="Icon Ring"
-           crossOrigin="anonymous" 
-           className="absolute top-0 left-0 w-full h-full pointer-events-none z-10"
-        />
-         {!userImage && (
-          <div className="w-full h-full flex items-center justify-center text-slate-400 p-4 text-center">
-            ここに画像が表示されます
-          </div>
-        )}
-      </div>
+    <>
+      {/* 完成画像表示用のモーダル */}
+      {finalImage && <ResultModal imageUrl={finalImage} onClose={() => setFinalImage(null)} />}
 
-      <div className="w-full max-w-xs flex flex-col gap-4">
-        <button onClick={() => fileInputRef.current?.click()} className="flex items-center justify-center gap-2 w-full bg-pastel-pink text-slate-800 font-bold py-3 px-4 rounded-xl hover:bg-opacity-90 transition-all duration-200 shadow-md">
-          <Upload className="w-5 h-5" />
-          画像をえらぶ
-        </button>
-        <input type="file" ref={fileInputRef} onChange={onFileChange} accept="image/*" className="hidden" />
-
-        <div className="flex items-center gap-2">
-            <span className="text-sm text-slate-600">大きさ</span>
-            <input type="range" value={zoom} min={0.2} max={3} step={0.01} onChange={(e) => setZoom(Number(e.target.value))} className="w-full h-2 bg-white rounded-lg appearance-none cursor-pointer accent-pastel-pink" disabled={!userImage} />
+      <div className="w-full flex flex-col items-center gap-6 p-4 sm:p-6 bg-white/50 rounded-2xl shadow-lg">
+        <div className="relative w-full max-w-[300px] aspect-square bg-slate-200 rounded-full overflow-hidden">
+          {userImage && (
+            <Cropper image={userImage} crop={crop} zoom={zoom} aspect={1} onCropChange={setCrop} onZoomChange={setZoom} onCropComplete={onCropComplete} cropShape="round" showGrid={false} />
+          )}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={ringImageUrl} alt="Icon Ring" crossOrigin="anonymous" className="absolute top-0 left-0 w-full h-full pointer-events-none z-10" />
+          {!userImage && (
+            <div className="w-full h-full flex items-center justify-center text-slate-400 p-4 text-center">
+              ここに画像が表示されます
+            </div>
+          )}
         </div>
 
-        <button onClick={handleDownload} disabled={!userImage || isProcessing} className="flex items-center justify-center gap-2 w-full bg-brand-secondary text-slate-800 font-bold py-3 px-4 rounded-xl hover:bg-opacity-90 transition-all duration-200 shadow-md disabled:bg-slate-300 disabled:cursor-not-allowed">
-          <Download className="w-5 h-5" />
-          {isProcessing ? "作成中..." : "画像を保存"}
-        </button>
+        <div className="w-full max-w-xs flex flex-col gap-4">
+          <button onClick={() => fileInputRef.current?.click()} className="flex items-center justify-center gap-2 w-full bg-pastel-pink text-slate-800 font-bold py-3 px-4 rounded-xl hover:bg-opacity-90 transition-all duration-200 shadow-md">
+            <Upload className="w-5 h-5" />
+            画像をえらぶ
+          </button>
+          <input type="file" ref={fileInputRef} onChange={onFileChange} accept="image/*" className="hidden" />
+
+          <div className="flex items-center gap-2">
+              <span className="text-sm text-slate-600">大きさ</span>
+              <input type="range" value={zoom} min={0.2} max={3} step={0.01} onChange={(e) => setZoom(Number(e.target.value))} className="w-full h-2 bg-white rounded-lg appearance-none cursor-pointer accent-pastel-pink" disabled={!userImage} />
+          </div>
+
+          <button onClick={handleSave} disabled={!userImage || isProcessing} className="flex items-center justify-center gap-2 w-full bg-brand-secondary text-slate-800 font-bold py-3 px-4 rounded-xl hover:bg-opacity-90 transition-all duration-200 shadow-md disabled:bg-slate-300 disabled:cursor-not-allowed">
+            <Save className="w-5 h-5" />
+            {isProcessing ? "作成中..." : "画像を保存"}
+          </button>
+        </div>
       </div>
-    </div>
+    </>
   );
 }
