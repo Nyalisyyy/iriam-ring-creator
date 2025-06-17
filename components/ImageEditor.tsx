@@ -2,7 +2,8 @@
 
 import React, { useState, useCallback, useRef } from 'react';
 import Cropper, { Area } from 'react-easy-crop';
-import { Download, Upload, Save, X } from 'lucide-react';
+// 【重要】ここで不要な 'Download' を削除しました
+import { Upload, Save, X } from 'lucide-react';
 
 // 完成した画像を表示するためのポップアップ（モーダル）コンポーネント
 const ResultModal = ({ imageUrl, onClose }: { imageUrl: string; onClose: () => void; }) => {
@@ -35,7 +36,6 @@ export function ImageEditor({ ringImageUrl }: Props) {
   const [zoom, setZoom] = useState(1);
   const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
-  // 【重要】完成した画像を保持するためのstateを追加
   const [finalImage, setFinalImage] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -51,7 +51,6 @@ export function ImageEditor({ ringImageUrl }: Props) {
     setCroppedAreaPixels(croppedAreaPixels);
   }, []);
   
-  // 【重要】handleSave に名称変更し、ロジックを修正
   const handleSave = async () => {
     if (!userImage || !croppedAreaPixels) return;
     setIsProcessing(true);
@@ -89,7 +88,6 @@ export function ImageEditor({ ringImageUrl }: Props) {
       ctx.drawImage(userImg, croppedAreaPixels.x, croppedAreaPixels.y, croppedAreaPixels.width, croppedAreaPixels.height, 0, 0, finalSize, finalSize);
       ctx.drawImage(ringImg, 0, 0, finalSize, finalSize);
 
-      // リンクをクリックさせる代わりに、stateに完成画像をセットする
       setFinalImage(canvas.toDataURL('image/png'));
 
     } catch (error) {
@@ -102,7 +100,6 @@ export function ImageEditor({ ringImageUrl }: Props) {
 
   return (
     <>
-      {/* 完成画像表示用のモーダル */}
       {finalImage && <ResultModal imageUrl={finalImage} onClose={() => setFinalImage(null)} />}
 
       <div className="w-full flex flex-col items-center gap-6 p-4 sm:p-6 bg-white/50 rounded-2xl shadow-lg">
