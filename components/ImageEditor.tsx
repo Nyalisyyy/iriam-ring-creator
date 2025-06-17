@@ -3,8 +3,6 @@
 import React, { useState, useCallback, useRef } from 'react';
 import Cropper, { Area } from 'react-easy-crop';
 import { Download, Upload } from 'lucide-react';
-// Next.jsのImageコンポーネントは、ここで表示するリング画像には使いません
-// import Image from 'next/image'; 
 
 interface Props {
   ringImageUrl: string;
@@ -42,12 +40,10 @@ export function ImageEditor({ ringImageUrl }: Props) {
         return;
       };
   
-      // 【重要】 new Image() を new window.Image() に変更
       const ringImg = new window.Image();
       ringImg.crossOrigin = "anonymous";
       ringImg.src = ringImageUrl;
       
-      // 画像の読み込みを待つ
       await new Promise((resolve, reject) => {
         ringImg.onload = resolve;
         ringImg.onerror = reject;
@@ -57,12 +53,10 @@ export function ImageEditor({ ringImageUrl }: Props) {
       canvas.width = finalSize;
       canvas.height = finalSize;
 
-      // 【重要】こちらも new window.Image() に変更
       const userImg = new window.Image();
       userImg.crossOrigin = "anonymous";
       userImg.src = userImage;
       
-      // 画像の読み込みを待つ
       await new Promise((resolve, reject) => {
         userImg.onload = resolve;
         userImg.onerror = reject;
@@ -92,8 +86,8 @@ export function ImageEditor({ ringImageUrl }: Props) {
   };
 
   return (
-    <div className="w-full flex flex-col items-center gap-6 p-6 bg-white/50 rounded-2xl shadow-lg">
-      <div style={{ position: 'relative', width: 300, height: 300 }} className="bg-slate-200 rounded-full overflow-hidden">
+    <div className="w-full flex flex-col items-center gap-6 p-4 sm:p-6 bg-white/50 rounded-2xl shadow-lg">
+      <div className="relative w-full max-w-[300px] aspect-square bg-slate-200 rounded-full overflow-hidden">
         {userImage && (
           <Cropper
             image={userImage}
@@ -111,10 +105,10 @@ export function ImageEditor({ ringImageUrl }: Props) {
            src={ringImageUrl} 
            alt="Icon Ring"
            crossOrigin="anonymous" 
-           style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', pointerEvents: 'none', zIndex: 10 }} 
+           className="absolute top-0 left-0 w-full h-full pointer-events-none z-10"
         />
          {!userImage && (
-          <div className="w-full h-full flex items-center justify-center text-slate-400">
+          <div className="w-full h-full flex items-center justify-center text-slate-400 p-4 text-center">
             ここに画像が表示されます
           </div>
         )}
@@ -129,7 +123,7 @@ export function ImageEditor({ ringImageUrl }: Props) {
 
         <div className="flex items-center gap-2">
             <span className="text-sm text-slate-600">大きさ</span>
-            <input type="range" value={zoom} min={0.2} max={3} step={0.01} onChange={(e) => setZoom(Number(e.target.value))} className="w-full h-2 bg-white rounded-lg appearance-none cursor-pointer" disabled={!userImage} />
+            <input type="range" value={zoom} min={0.2} max={3} step={0.01} onChange={(e) => setZoom(Number(e.target.value))} className="w-full h-2 bg-white rounded-lg appearance-none cursor-pointer accent-pastel-pink" disabled={!userImage} />
         </div>
 
         <button onClick={handleDownload} disabled={!userImage || isProcessing} className="flex items-center justify-center gap-2 w-full bg-brand-secondary text-slate-800 font-bold py-3 px-4 rounded-xl hover:bg-opacity-90 transition-all duration-200 shadow-md disabled:bg-slate-300 disabled:cursor-not-allowed">
