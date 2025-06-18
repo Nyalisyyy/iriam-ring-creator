@@ -13,10 +13,8 @@ export function RingUploader() {
   const handleFileChange = async (file: File | null) => {
     if (!file) return;
 
-    // 先にエラー表示をリセット
     setError(null);
 
-    // 【修正点1】ファイルサイズのチェックを追加
     const MAX_FILE_SIZE = 4.5 * 1024 * 1024; // 4.5MB
     if (file.size > MAX_FILE_SIZE) {
       setError('ファイルサイズは4.5MB以下にしてください。');
@@ -40,15 +38,14 @@ export function RingUploader() {
         body: file,
       });
 
-      // 【修正点2】エラーハンドリングを強化
       if (!response.ok) {
         let errorMessage = `アップロードに失敗しました。(Code: ${response.status})`;
+        // 【重要】ここのエラー処理を修正
         try {
-          // JSON形式でのエラー解析を試みる
           const errorData = await response.json();
           errorMessage = errorData.error?.message || errorMessage;
-        } catch (jsonError) {
-          // JSONでなければ、サーバーからのテキストをそのまま使う
+        } catch {
+          // JSONでないエラーの場合、catchの引数は不要
           console.error("Response was not JSON.", response.statusText);
           errorMessage = `サーバーエラー: ${response.statusText}`
         }

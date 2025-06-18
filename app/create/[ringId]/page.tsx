@@ -2,6 +2,7 @@ import { getRingById } from '@/lib/db';
 import { ImageEditor } from '@/components/ImageEditor';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
+import "../../globals.css";
 
 // Next.jsの型定義
 type Props = {

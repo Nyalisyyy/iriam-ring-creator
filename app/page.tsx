@@ -1,5 +1,6 @@
 import { RingUploader } from "@/components/RingUploader";
 import { Sparkles } from "lucide-react";
+import "./globals.css";
 
 // メインのページコンポーネント
 export default function HomePage() {
