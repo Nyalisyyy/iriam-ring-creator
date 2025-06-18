@@ -4,5 +4,39 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ↓↓↓ この下から追加 ↓↓↓ */
 
-/* bodyへの@applyやその他のスタイル指定はすべて削除します */
+/* スライダーのカスタムスタイル */
+.custom-range {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 8px; /* 溝の高さを少し太く */
+  @apply bg-slate-200 rounded-full cursor-pointer; /* 溝の色を薄いグレーに */
+}
+
+/* Chrome, Safari, Edge のつまみ（ドラッグする丸い部分） */
+.custom-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  @apply bg-pastel-pink rounded-full border-2 border-white shadow; /* つまみの色をパステルピンクに */
+}
+/* ホバー時につまみの色を少し濃くする */
+.custom-range:hover::-webkit-slider-thumb {
+  @apply bg-pink-400;
+}
+
+/* Firefox のつまみ */
+.custom-range::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  @apply bg-pastel-pink rounded-full border-2 border-white shadow;
+  border-radius: 9999px; /* Firefox用の角丸 */
+}
+/* ホバー時につまみの色を少し濃くする */
+.custom-range:hover::-moz-range-thumb {
+  @apply bg-pink-400;
+}

@@ -2,8 +2,7 @@
 
 import React, { useState, useCallback, useRef } from 'react';
 import Cropper, { Area } from 'react-easy-crop';
-// 【重要】ここで不要な 'Download' を削除しました
-import { Upload, Save, X } from 'lucide-react';
+import { Save, Upload, X } from 'lucide-react';
 
 // 完成した画像を表示するためのポップアップ（モーダル）コンポーネント
 const ResultModal = ({ imageUrl, onClose }: { imageUrl: string; onClose: () => void; }) => {
@@ -125,7 +124,8 @@ export function ImageEditor({ ringImageUrl }: Props) {
 
           <div className="flex items-center gap-2">
               <span className="text-sm text-slate-600">大きさ</span>
-              <input type="range" value={zoom} min={0.2} max={3} step={0.01} onChange={(e) => setZoom(Number(e.target.value))} className="w-full h-2 bg-white rounded-lg appearance-none cursor-pointer accent-pastel-pink" disabled={!userImage} />
+              {/* 【重要】classNameを "custom-range" に変更 */}
+              <input type="range" value={zoom} min={0.2} max={3} step={0.01} onChange={(e) => setZoom(Number(e.target.value))} className="custom-range" disabled={!userImage} />
           </div>
 
           <button onClick={handleSave} disabled={!userImage || isProcessing} className="flex items-center justify-center gap-2 w-full bg-brand-secondary text-slate-800 font-bold py-3 px-4 rounded-xl hover:bg-opacity-90 transition-all duration-200 shadow-md disabled:bg-slate-300 disabled:cursor-not-allowed">
