@@ -40,12 +40,10 @@ export function RingUploader() {
 
       if (!response.ok) {
         let errorMessage = `アップロードに失敗しました。(Code: ${response.status})`;
-        // 【重要】ここのエラー処理を修正
         try {
           const errorData = await response.json();
           errorMessage = errorData.error?.message || errorMessage;
         } catch {
-          // JSONでないエラーの場合、catchの引数は不要
           console.error("Response was not JSON.", response.statusText);
           errorMessage = `サーバーエラー: ${response.statusText}`
         }

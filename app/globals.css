@@ -1,10 +1,7 @@
 @import "tailwindcss";
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-/* ↓↓↓ この下から追加 ↓↓↓ */
 
 /* スライダーのカスタムスタイル */
 .custom-range {
@@ -12,8 +9,11 @@
   -moz-appearance: none;
   appearance: none;
   width: 100%;
-  height: 8px; /* 溝の高さを少し太く */
-  @apply bg-slate-200 rounded-full cursor-pointer; /* 溝の色を薄いグレーに */
+  height: 8px;
+  /* @apply を使わずに直接スタイルを適用 */
+  background-color: #e5e7eb; /* slate-200 */
+  border-radius: 9999px;
+  cursor: pointer;
 }
 
 /* Chrome, Safari, Edge のつまみ（ドラッグする丸い部分） */
@@ -22,21 +22,30 @@
   appearance: none;
   width: 20px;
   height: 20px;
-  @apply bg-pastel-pink rounded-full border-2 border-white shadow; /* つまみの色をパステルピンクに */
+  /* 【重要】@apply bg-pastel-pink を直接の色指定に変更 */
+  background-color: #FFC8DD; /* pastel-pink */
+  border-width: 2px;
+  border-color: #ffffff;
+  border-radius: 9999px;
+  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
 }
 /* ホバー時につまみの色を少し濃くする */
 .custom-range:hover::-webkit-slider-thumb {
-  @apply bg-pink-400;
+  background-color: #f472b6; /* pink-400 */
 }
 
 /* Firefox のつまみ */
 .custom-range::-moz-range-thumb {
   width: 20px;
   height: 20px;
-  @apply bg-pastel-pink rounded-full border-2 border-white shadow;
-  border-radius: 9999px; /* Firefox用の角丸 */
+  /* 【重要】@apply bg-pastel-pink を直接の色指定に変更 */
+  background-color: #FFC8DD; /* pastel-pink */
+  border-width: 2px;
+  border-color: #ffffff;
+  border-radius: 9999px;
+  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
 }
 /* ホバー時につまみの色を少し濃くする */
 .custom-range:hover::-moz-range-thumb {
-  @apply bg-pink-400;
+  background-color: #f472b6; /* pink-400 */
 }
