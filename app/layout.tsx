@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { M_PLUS_Rounded_1c } from "next/font/google";
 import "./globals.css";
+import { CustomFooter } from "@/components/CustomFooter"; // 【重要】フッターコンポーネントをインポート
 
 const roundedMplus = M_PLUS_Rounded_1c({
   weight: ['400', '700'],
@@ -20,9 +21,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ja">
-      {/* 【重要】bodyタグに直接クラスを記述します */}
       <body className={`${roundedMplus.className} bg-gradient-to-br from-pastel-blue to-pastel-purple min-h-screen text-slate-700`}>
         {children}
+        <CustomFooter /> {/* 【重要】bodyタグの最後にフッターを追加 */}
       </body>
     </html>
   );
