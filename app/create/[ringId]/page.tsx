@@ -1,3 +1,4 @@
+import { Analytics } from "@vercel/analytics/next"
 import { getRingById } from '@/lib/db';
 import { ImageEditor } from '@/components/ImageEditor';
 import { notFound } from 'next/navigation';
@@ -32,6 +33,7 @@ export default async function CreatePage({ params }: Props) {
           リングを配布する方はこちら
         </Link>
       </footer>
+      <Analytics />
     </main>
   );
 }

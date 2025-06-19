@@ -1,3 +1,4 @@
+import { Analytics } from "@vercel/analytics/next"
 import { RingUploader } from "@/components/RingUploader";
 import { Sparkles } from "lucide-react";
 
@@ -22,6 +23,7 @@ export default function HomePage() {
       <footer className="py-8 mt-auto text-center w-full text-white/70 text-sm">
         <p>© 2025 Ring-Drip. All Rights Reserved.</p>
       </footer>
+      <Analytics />
     </main>
   );
 }
