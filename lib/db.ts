@@ -21,3 +21,18 @@ export async function getRingById(id: string): Promise<IconRing | null> {
     await client.end();
   }
 }
+
+export async function getRingsForUser(userId: string) {
+  const client = createClient({ connectionString: process.env.DIRECT_DATABASE_URL });
+  await client.connect();
+  try {
+    const result = await client.sql`
+      SELECT id, image_url, created_at FROM icon_rings 
+      WHERE user_id = ${userId} 
+      ORDER BY created_at DESC
+    `;
+    return result.rows;
+  } finally {
+    await client.end();
+  }
+}

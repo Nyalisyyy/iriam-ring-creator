@@ -2,6 +2,8 @@ import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import { createClient } from '@vercel/postgres';
 import { nanoid } from 'nanoid';
 import { NextRequest, NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth'; // 先ほど作成した設定をインポート
 
 const s3Client = new S3Client({
   region: 'auto',
@@ -13,10 +15,13 @@ const s3Client = new S3Client({
 });
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
+  // 【重要】現在のログイン情報を取得
+  const session = await getServerSession(authOptions);
+  // ログインしていればユーザーIDを、していなければnull（ゲスト）を取得
+  const userId = session?.user?.id ?? null;
+
   const file = await request.blob();
-  // 【重要】エンコードされたファイル名を受け取り、デコードして元に戻す
-  const encodedFilename = request.headers.get('x-vercel-filename');
-  const filename = encodedFilename ? decodeURIComponent(encodedFilename) : 'ring.png';
+  const filename = request.headers.get('x-vercel-filename') || 'ring.png';
   const fileType = file.type;
 
   if (!file) {
@@ -41,8 +46,10 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     const client = createClient({ connectionString: process.env.DIRECT_DATABASE_URL });
     await client.connect();
     try {
+      // 【重要】INSERT文にuser_idを追加
       await client.sql`
-        INSERT INTO icon_rings (id, image_url) VALUES (${ringId}, ${publicUrl});
+        INSERT INTO icon_rings (id, image_url, user_id) 
+        VALUES (${ringId}, ${publicUrl}, ${userId});
       `;
     } finally {
       await client.end();
@@ -51,7 +58,6 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     const proto = request.headers.get("x-forwarded-proto") || 'http';
     const host = request.headers.get("x-forwarded-host") || request.headers.get("host");
     const shareUrl = `${proto}://${host}/create/${ringId}`;
-
     const deletionDate = new Date();
     deletionDate.setDate(deletionDate.getDate() + 60);
 

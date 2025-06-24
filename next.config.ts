@@ -11,8 +11,19 @@ const config: NextConfig = {
         port: '',
         pathname: '/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'lh3.googleusercontent.com',
+        port: '',
+        pathname: '/a/**',
+      },
+       {
+        protocol: 'https',
+        hostname: 'pub-*.r2.dev',
+      },
     ],
   },
+  
 };
 
 export default config;
