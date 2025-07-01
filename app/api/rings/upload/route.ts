@@ -3,7 +3,7 @@ import { createClient } from '@vercel/postgres';
 import { nanoid } from 'nanoid';
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth'; // 先ほど作成した設定をインポート
+import { authOptions } from '@/lib/auth';
 
 const s3Client = new S3Client({
   region: 'auto',
@@ -15,13 +15,12 @@ const s3Client = new S3Client({
 });
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
-  // 【重要】現在のログイン情報を取得
   const session = await getServerSession(authOptions);
-  // ログインしていればユーザーIDを、していなければnull（ゲスト）を取得
   const userId = session?.user?.id ?? null;
 
   const file = await request.blob();
-  const filename = request.headers.get('x-vercel-filename') || 'ring.png';
+  const encodedFilename = request.headers.get('x-vercel-filename');
+  const filename = encodedFilename ? decodeURIComponent(encodedFilename) : 'ring.png';
   const fileType = file.type;
 
   if (!file) {
@@ -29,24 +28,26 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
   }
 
   const buffer = Buffer.from(await file.arrayBuffer());
+  // 日本語などを含むファイル名から、ユニークなファイル名を生成
   const uniqueFilename = `${nanoid()}-${filename}`;
 
   try {
     const command = new PutObjectCommand({
       Bucket: process.env.R2_BUCKET_NAME!,
+      // Keyにはデコードされた（元の日本語の）ファイル名を使う
       Key: uniqueFilename,
       Body: buffer,
       ContentType: fileType,
     });
     await s3Client.send(command);
 
-    const publicUrl = `${process.env.R2_PUBLIC_URL}/${uniqueFilename}`;
+    // 【重要】データベースに保存するURLを生成する際は、ファイル名をエンコードする
+    const publicUrl = `${process.env.R2_PUBLIC_URL}/${encodeURIComponent(uniqueFilename)}`;
     const ringId = nanoid(12);
 
     const client = createClient({ connectionString: process.env.DIRECT_DATABASE_URL });
     await client.connect();
     try {
-      // 【重要】INSERT文にuser_idを追加
       await client.sql`
         INSERT INTO icon_rings (id, image_url, user_id) 
         VALUES (${ringId}, ${publicUrl}, ${userId});
