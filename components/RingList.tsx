@@ -2,7 +2,7 @@
 
 import { Trash2, Share2 } from "lucide-react";
 import { useState, useEffect } from "react";
-import { deleteRingAction } from "../app/actions";
+// 【重要】ここで不要な deleteRingAction のインポートを削除しました
 
 // Ringの型定義
 type Ring = {
@@ -11,11 +11,10 @@ type Ring = {
   created_at: Date;
 };
 
-// 【重要】リストの各アイテムを独立したコンポーネントに分離
+// リストの各アイテムを独立したコンポーネントに分離
 const RingListItem = ({ ring, deleteAction }: { ring: Ring; deleteAction: (formData: FormData) => Promise<void>; }) => {
   const [showConfirm, setShowConfirm] = useState(false);
   const [ringToDelete, setRingToDelete] = useState<FormData | null>(null);
-  // 【重要】各アイテムが自身の画像URLとエラー状態を管理
   const [currentImageUrl, setCurrentImageUrl] = useState(ring.image_url);
   const [hasTriedFallback, setHasTriedFallback] = useState(false);
 
@@ -100,7 +99,7 @@ const RingListItem = ({ ring, deleteAction }: { ring: Ring; deleteAction: (formD
   );
 };
 
-// 確認モーダルのコンポーネント (変更なし)
+// 確認モーダルのコンポーネント
 const ConfirmDeleteModal = ({ onConfirm, onCancel }: { onConfirm: () => void; onCancel: () => void; }) => (
   <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
     <div className="bg-white rounded-lg p-6 shadow-xl text-center">
