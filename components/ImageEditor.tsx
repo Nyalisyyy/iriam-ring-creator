@@ -105,7 +105,26 @@ export function ImageEditor({ ringImageUrl }: Props) {
       userImg.crossOrigin = "anonymous";
       userImg.src = userImage;
       await new Promise<void>((resolve, reject) => { userImg.onload = () => resolve(); userImg.onerror = reject; });
-      ctx.drawImage(userImg, croppedAreaPixels.x, croppedAreaPixels.y, croppedAreaPixels.width, croppedAreaPixels.height, 0, 0, finalSize, finalSize);
+
+      // croppedAreaPixelsは元画像のピクセル座標基準なので、
+      // 一度中間Canvasでクロップしてから最終Canvasに描画する
+      const cropCanvas = document.createElement('canvas');
+      cropCanvas.width = croppedAreaPixels.width;
+      cropCanvas.height = croppedAreaPixels.height;
+      const cropCtx = cropCanvas.getContext('2d');
+      if (!cropCtx) { setIsProcessing(false); return; }
+      cropCtx.drawImage(
+        userImg,
+        croppedAreaPixels.x,
+        croppedAreaPixels.y,
+        croppedAreaPixels.width,
+        croppedAreaPixels.height,
+        0,
+        0,
+        croppedAreaPixels.width,
+        croppedAreaPixels.height
+      );
+      ctx.drawImage(cropCanvas, 0, 0, finalSize, finalSize);
       ctx.drawImage(ringImg, 0, 0, finalSize, finalSize);
       setFinalImage(canvas.toDataURL('image/png'));
     } catch (error) {
